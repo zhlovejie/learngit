@@ -1,0 +1,88 @@
+
+
+js/jquery-1.11.2.min.js  中加入以下代码
+/*
+*检测并修复
+*1.缺少右侧菜单所导致的居中错位问题
+*2.左侧菜单图片不显示问题
+*/
+(function(d,c){c.addEventListener("DOMContentLoaded",function(){try{var l=c.getElementById("changeNavMenu"),i=c.getElementById("nav-right"),b=$(".panel-title"),a=c.getElementById("changeMoreMenu");if(l){l.innerHTML="";l.className="ub-img icon-menu umw2 umh4"}if(a){a.innerHTML="";a.className="ub-img icon-more umw2 umh4"}if(!i){var j=c.querySelector("header#header");j=j?j.querySelector("div#header"):c.querySelector("div#header");var h=c.createElement("div");h.id="nav-right";h.className="nav-btn nav-bt";j.appendChild(h)}if(b.length!==0&&$.trim(b.html()).length===0){b.hide()}}catch(k){}},false)})(window,document);
+
+//=============================================================
+css/fms.css 中加入以下代码
+
+/*列表、表单样式*/
+div[data-role='appview']{position: absolute;width: 100%;height: 100%;overflow: auto;}
+/*list*/
+#content0{background:#fff}
+#content .lis{padding: .75em .5em;min-height: 2.5em;}
+#content .lis li.bc-text{color: #636363;font-size: 95%;}
+#content .lis li.bc-text:first-child{color: #000;font-size: 100%;}
+#content .lis li.bc-text:only-child{color: #636363;}
+#header.bc-text-head{color:#fff}#header.bc-head{background-color:#099fde}ol,ul{margin:0}.bc-bg{background-color:#fff}#content{background:#fff}.bc-border{border-color:#e2e2e2}.sc-bg-active{background-color:#f0f0f0}.sc-bg{background-color:#fff}.list-group{border-radius:0;box-shadow:none;margin-bottom:0}#goodsList+div{padding:.25em 0}.b-c0c{border-color:#e2e2e2!important}.uinput input,.uinput textarea{text-indent:.5em}div[data-fms-location-show="True"]{padding:15px;padding-top:0}div[data-fms-location-show="False"]:empty{display:none}
+#content0 *,#content *{-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;}
+/*form*/
+#content{font-size: 100%;padding:0;background:#fff;}
+#content .panel{background:#fff;margin-bottom:1em}
+#tableBdBody .panel-heading{margin:0 -15px 0 -15px;background:rgba(9,159,222,.5);color:#fff;border:0}
+.form-group{overflow:hidden}
+.form-group>label{float:left;width:33%;}
+.form-group>div{float:left;width:67%}
+#content input,#content select,#content textarea,#content label{-webkit-appearance:none;padding: .75em 0;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;outline: none;resize:none;}
+#content .form-group label{padding-left: 0;padding-right: 0;}
+.panel-primary>.panel-heading{border:0;background:rgba(9,159,222,.75);padding:0}
+.panel-primary>.panel-heading>.panel-title{padding:.5em 15px}
+.panel-primary>.panel-heading>.panel-title:empty{display:none}
+.panel{box-shadow:none;border-radius:0;border:0}
+.panel-info{border-color:#e2e2e2}
+.panel-info>.panel-heading{background:#f0f0f0;border-bottom:1px solid #e2e2e2;color:#000;border-color:#e2e2e2}
+.panel-heading{border:1px solid #e2e2e2;padding:.5em 15px;overflow:hidden}
+.panel-heading .close{border:0;background:0;color:#fff;float:right;padding:0 1em;font-size:100%}
+.panel-heading .close .sr-only{display:none}
+.panel-body{padding:0 15px}
+.form-control{background:#fff;border:0;border-radius:0;box-shadow:none;padding:0;font-size:100%;height:auto;line-height:inherit;width:100%;overflow:hidden}
+.form-control[disabled],.form-control[readonly],fieldset[disabled] .form-control{cursor:not-allowed;background-color:#fff;color:#ced6da}
+.input-lg{padding:0;height:inherit;line-height:inherit;font-size:inherit;border-radius:0}
+.form-group{margin-bottom:0;border-bottom:1px solid #e2e2e2}
+.form-group label{height:auto;font-weight:normal;}
+.panel-title{font-weight:bold;font-size:100%}
+.alert-danger{background:transparent;border:0;font-size:70%;color:red}
+/*针对于按钮*/
+li[data-type='form_button_system'] .form-group{border-bottom:0}
+li[data-type='form_button_system'] .form-group >label{float: none;width: auto;}
+li[data-type='form_button_system'] .form-group >div{float: none;width: auto;}
+/*针对于Label文本框*/
+li[data-type='form_text'] .form-group label,li[data-type='form_label'] .form-group label{display: block;}
+textarea.form-control{font-size:100%;min-height:5em;max-height:8em}
+.btn-primary{background-color:#ff9a14;width:100%;border:0;color:#fff;border-radius:3px}
+.imgBox{margin:0}
+/*同步操作页面*/
+#adminDiv{}
+#adminDiv #listview{margin-top: .4em;}
+#adminDiv button,#adminDiv select{margin: .4em 0 0 0;}
+#adminDiv .btn-primary{background-color: #007DB8;width: 100%;border: 0;color: #fff;border-radius: 0;}
+/*登录页面*/
+section[data-fms-type='login'] .checkbox{min-width: 3em;min-height: 3em;padding: 0;margin: 0;}
+.logoBg2{background-size: 100% 100%;}
+
+//===============================================================
+
+*,*:before,*:after{margin: 0;padding: 0;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;}
+    html,body{font-size: 100%;font-family:Tahoma,Arial;}
+	/*新插件 grid样式*/
+	table.grid-table{width:100%;table-layout:fixed;border:0 none;border-collapse:separate;border-spacing:0}
+	table.grid-table th,table.grid-table td{padding:.75em 1em;font-style:normal;font-weight:normal;line-height:normal;border-color:#e5e4e7;border-width:0 1px 0 0;border-style:solid;border-collapse:collapse;text-align:left;vertical-align:middle;overflow:hidden;text-overflow:ellipsis}
+	table.grid-table th{font-weight: bold;}
+	table.grid-table th.e-m-state-active,table.grid-table td.state-active{background: #007aff;color: #fff;}
+	table.grid-table tr:nth-child(2n){background:#efeef3}
+	div.grid-table-head{border-color:#e5e4e7;border-style:solid;border-width:1px 0 0 1px;}
+	div.grid-table-body{border-color:#e5e4e7;border-style:solid;border-width:1px 0 1px 1px;height: auto;-webkit-overflow-scrolling: touch;overflow: auto;}
+	.grid-table-fliter-box{overflow: hidden;padding: .5em;border-bottom: 1px solid #e2e2e2;display: none;}
+	#grid-table-fliter-sw,#grid-table-fliter-btn{-webkit-appearance: none;border-radius: 0;}
+	#grid-table-fliter-sw{float: left;width: 70%;border:1px solid #e2e2e2;border-right: none;padding: .5em;background: #fff;}
+	#grid-table-fliter-btn{float: left;width: 30%;border:1px solid orange;border-width: 1px 0 1px 0;padding: .5em;background: orange;color: #fff;}
+
+
+/*之前修改的Grid样式*/
+/*grid样式*/
+.e-m-grid-core{margin: 1em 0;}table.e-m-grid-table{width:100%;table-layout:fixed;border:0 none;border-collapse:separate;border-spacing:0}table.e-m-grid-table th,table.e-m-grid-table td{padding:.75em 1em;font-size:90%;font-style:normal;font-weight:normal;line-height:normal;border-color:#e5e4e7;border-width:0 1px 0 0;border-style:solid;border-collapse:collapse;text-align:left;vertical-align:middle;overflow:hidden;text-overflow:ellipsis}table.e-m-grid-table th{font-weight: bold;}table.e-m-grid-table th.e-m-state-active,table.e-m-grid-table td.e-m-state-active{background: #007aff;color: #fff;}table.e-m-grid-table tr:nth-child(2n){background:#efeef3}div.e-m-grid-content{border-color:#e5e4e7;border-style:solid;border-width:1px 0;height: auto !important;}.dropdown-menu{position: absolute;right: 0px;left: auto;top: 2.8em;display: none;padding: 0.5em 1em;color: rgb(0, 0, 0);z-index: 999999999999;box-shadow: rgb(226, 226, 226) 0px 0px 3px;font-size: 100%;}

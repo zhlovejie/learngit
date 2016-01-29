@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+	<title>GridDemo</title>
+    <style type="text/css">
+    *,*:before,*:after{margin: 0;padding: 0;-webkit-box-sizing: border-box;-moz-box-sizing: border-box;box-sizing: border-box;}
+    html,body{font-size: 100%;font-family:Tahoma,Arial;}
+	/*grid样式*/
+	table.grid-table{width:100%;table-layout:fixed;border:0 none;border-collapse:separate;border-spacing:0}
+	table.grid-table th,table.grid-table td{padding:.75em 1em;font-style:normal;font-weight:normal;line-height:normal;border-color:#e5e4e7;border-width:0 1px 0 0;border-style:solid;border-collapse:collapse;text-align:left;vertical-align:middle;overflow:hidden;text-overflow:ellipsis}
+	table.grid-table th{font-weight: bold;}
+	table.grid-table th.e-m-state-active,table.grid-table td.state-active{background: #007aff;color: #fff;}
+	table.grid-table tr:nth-child(2n){background:#efeef3}
+	div.grid-table-head{border-color:#e5e4e7;border-style:solid;border-width:1px 0 0 1px;}
+	div.grid-table-body{border-color:#e5e4e7;border-style:solid;border-width:1px 0 1px 1px;height: auto;-webkit-overflow-scrolling: touch;overflow: auto;}
+	.grid-table-fliter-box{overflow: hidden;padding: .5em;border-bottom: 1px solid #e2e2e2;display: none;}
+	#grid-table-fliter-sw,#grid-table-fliter-btn{-webkit-appearance: none;border-radius: 0;}
+	#grid-table-fliter-sw{float: left;width: 70%;border:1px solid #e2e2e2;border-right: none;padding: .5em;background: #fff;}
+	#grid-table-fliter-btn{float: left;width: 30%;border:1px solid orange;border-width: 1px 0 1px 0;padding: .5em;background: orange;color: #fff;}
+    </style>
+</head>
+<body>
+	<div class="listview"></div>
+	<script type="text/javascript" src="js/jquery-1.11.2.min.js"></script>
+	<!-- fms.widget.js 已包含，实际使用不需要引入 -->
+	<script type="text/javascript" src="js/tap.js"></script>
+	<script type="text/javascript">
+		function Grid(options){
+			this.options = $.extend({
+				ele:$(document.body),
+	            fields:[],
+	            tableName:'NewTable',
+	            items:[],
+	            allowPaging:false,
+	            pageSettings:null,
+	            allowScrolling:true,
+	            scrollSettings:{height:300},
+	            allowSorting:false,
+	            allowFiltering:false,
+	            actionSuccess:function(){},
+	            rowSelecting:function(){}
+			},options || {});
+			this.init();
+		}
+		Grid.prototype.init = function(){
+			var t = this;
+			t._ele = $(t.options.ele);
+			t._ele.html('');
+			t._rowNum = 0;
+			t._width = 0;
+			t.getDataSource();
+			t.createHeader();
+			if(t.options.allowSorting){
+				t.sort();
+			}
+			if(t.options.allowPaging){
+				t.initPage();
+			}else{
+				t.addRow(t.options.items,true);
+			}
+			t.setStyle();
+			t.options.actionSuccess();
+		};
+		Grid.prototype.refresh = function(items){
+			var t = this;
+			t._items = t.options.items = items;
+			if(t.options.allowPaging){
+				t.initPage();
+			}else{
+				t.addRow(t.options.items,true);
+			}
+		};
+		Grid.prototype.getDataSource = function(){
+			var t = this;
+			t._items = t.options.items;
+		};
+
+		Grid.prototype.createHeader = function(){
+			var t = this,fields = t.options.fields;
+			var head = '';
+			if(t.options.allowFiltering){
+				//添加搜索框
+				head += '<div class="grid-table-fliter-box"><input type="text" id="grid-table-fliter-sw"><input type="button" value="search" id="grid-table-fliter-btn"></div>';
+			}
+			head +='<div class="grid-table-head"><table class="grid-table grid-head"><thead><tr>';
+			for(var i=0,l=fields.length;i<l;i++){
+				head+=('<th id="th_'+i+'" field='+fields[i].field+'>'+fields[i].headerText+'</th>');
+				if(fields[i].width && !isNaN(fields[i].width) && fields[i].width>0){
+					t._width += fields[i].width;
+				}
+			}
+			head+='</tr></thead></table></div>';
+			t._ele.append(head);
+			var body = '<div class="grid-table-body"><table class="grid-table grid-body"><tbody></tbody></table></div>';
+			t._ele.append(body);
+
+			t._head = t._ele.find(".grid-table-head");
+			t._body = t._ele.find(".grid-table-body");
+			t._search_box = t._ele.find(".grid-table-fliter-box");
+			t.bindEvent();
+		};
+		Grid.prototype.simpleCreateContent = function(items){
+			var t = this,fields = t.options.fields;
+			var head = '';
+			if(items.length > 0){
+				for(var i=0,l=items.length;i<l;i++){
+					head+='<tr id="tr_'+(t._rowNum++)+'">';
+					for(var j=0,len=fields.length;j<len;j++){
+						head+='<td>'+items[i][fields[j].field]+'</td>';
+					}
+					head+='</tr>';
+				}
+			}
+			return head;
+		};
+		Grid.prototype.setStyle = function(){
+			var t = this;
+			if(t.options.allowScrolling){
+				t._body.css({"height":t.options.scrollSettings.height+"px"});
+			}
+			if(t._width > 0){
+				t._ele.css({width:t._width});
+			}
+		};
+		Grid.prototype.bindEvent = function(){
+			var t = this;
+			t._body.tap(function(evt){
+				evt.preventDefault();
+				setTimeout(function(){
+					if(evt.target.tagName === "TD"){
+						var tr = evt.target.parentNode;
+						var _index = tr.id.split("_")[1];
+						t.options.rowSelecting(_index,t.options.items[_index]);
+					}
+				},320);
+			});
+			if(t.options.allowFiltering){
+				t._head.longTap(function(evt){
+					evt.preventDefault();
+					if(evt.target.tagName === "TH"){
+						t._search_box.slideDown();
+						var th = evt.target;
+						t._filter_field = $(th).attr("field");
+						t._search_box.find("#grid-table-fliter-sw").attr({
+							placeholder:th.innerHTML
+						});
+					}
+				});
+				$("#grid-table-fliter-btn").tap(function(evt){
+					var sw = $("#grid-table-fliter-sw");
+					t.search($.trim(sw.val()),t._filter_field);
+				});
+			}
+		};
+
+		Grid.prototype.initPage = function(){
+			var t = this;
+			t._body.unbind('scroll');
+			var pageSize = t.options.pageSettings.pageSize;
+			var TotalCount = t.options.items.length;
+			var Totalpage = (TotalCount%pageSize) === 0 ? (TotalCount/pageSize) : (TotalCount/pageSize)+1;
+			t._pageInfo = {
+				pageSize:pageSize,
+				TotalCount:TotalCount,
+				Totalpage:Totalpage,
+				ThisPage:0,
+				PageType:t.options.pageSettings.pageType//number drag
+			};
+			t._scroll_handler = null;
+			if(t._pageInfo.PageType === "number"){}
+			if(t._pageInfo.PageType === "drag"){
+				if(t._pageInfo.ThisPage === 0 && t._pageInfo.ThisPage <= t._pageInfo.Totalpage){
+					t.addRow(t.options.items.slice(0,t._pageInfo.pageSize),true);
+					t._pageInfo.ThisPage++;
+				}
+				t._body.on('scroll',function(){
+					//evt.preventDefault();
+					if(t._scroll_handler){
+						clearTimeout(t._scroll_handler);
+					}
+					t._scroll_handler = setTimeout(function(){
+						var scrollTop = t._body.scrollTop(),
+						height = t._body.height(),
+						scrollHeight = t._body && t._body[0].scrollHeight;
+						if(scrollTop + height >= scrollHeight){
+							if(t._pageInfo.ThisPage <= t._pageInfo.Totalpage){
+								var from = t._pageInfo.ThisPage * t._pageInfo.pageSize;
+								var to = from + t._pageInfo.pageSize;
+								t.addRow(t.options.items.slice(from,to),true);
+								t._pageInfo.ThisPage++;
+							}else{
+								alert('no more data');
+							}
+						}
+					},20);
+				});
+			}
+		};
+		Grid.prototype.unBindEvent = function(){
+			var t = this;
+			t._body && t._body.unbind();
+			t._head && t._head.unbind();
+		};
+		Grid.prototype.addRow = function(items,flag){
+			//flag 内部使用
+			var t = this,head='',fields = t.options.fields;
+			if(Array.isArray(items) && items.length > 0){
+				if(!flag){
+					t.options.items = t.options.items.concat(items);
+				}
+				for(var i=0,l=items.length;i<l;i++){
+					head+='<tr id="tr_'+(t._rowNum++)+'">';
+					for(var j=0,len=fields.length;j<len;j++){
+						head+='<td>'+items[i][fields[j].field]+'</td>';
+					}
+					head+='</tr>';
+				}
+				t._body && t._body.find(".grid-body tbody").append(head);
+			}
+		};
+		Grid.prototype.removeRow = function(index){
+			var t = this;
+			if(typeof index === 'number' && index >= 0 && index <= t.options.items.length){
+				t.options.items.splice(index,1);
+				t._items = t.options.items
+				$("#tr_"+index).length && $("#tr_"+index).remove();
+			}
+		};
+		//根据表头排序
+		Grid.prototype.sort = function(){
+			var t = this;
+			t._head.tap(function(evt){
+				if(evt.target.tagName === "TH"){
+					var th = evt.target;
+					var field = $(th).attr("field");
+					if(!$(th).attr("srotType")){
+						$(th).attr("srotType","asc");
+					}
+					if($(th).attr("srotType") === "asc"){
+						$(th).attr("srotType","desc");
+						t.options.items.sort(function(row1,row2){
+							return compareFunc(row1[field],row2[field]);
+						});
+					}else{
+						$(th).attr("srotType","asc");
+						t.options.items.reverse();
+					}
+					t._body && t._body.find(".grid-body tbody").html('');
+					t._rowNum = 0;
+					if(t.options.allowPaging){
+						t.initPage();
+					}else{
+						var sortRes = t.simpleCreateContent(t.options.items);
+						t._body && t._body.find(".grid-body tbody").html(sortRes);
+					}
+				}
+			});
+			function compareFunc(param1,param2){
+	             if(typeof param1 == "string" && typeof param2 == "string"){
+	                 return param1.localeCompare(param2);
+	             }
+	             if(typeof param1 == "number" && typeof param2 == "string"){
+	                 return -1;
+	             }
+	             if(typeof param1 == "string" && typeof param2 == "number"){
+	                 return 1;
+	             }
+	             if(typeof param1 == "number" && typeof param2 == "number"){
+	                 if(param1 > param2) return 1;
+	                 if(param1 == param2) return 0;
+	                 if(param1 < param2) return -1;
+	             }
+	         }     
+		};
+		Grid.prototype.search = function(sw,field){
+			var t = this;
+			t._items && (t.options.items = t._items);
+			t._search_cache = [];
+			for(var i=0,l=t.options.items.length;i<l;i++){
+				t.options.items[i][field].indexOf(sw) !== -1 && t._search_cache.push(t.options.items[i]);
+			}
+			if(t._search_cache.length > 0){
+				t.options.items = t._search_cache;
+				t._rowNum = 0;
+				t._body && t._body.find(".grid-body tbody").html('');
+				if(t.options.allowPaging){
+					t.initPage();
+				}else{
+					var resHTML = t.simpleCreateContent(t._search_cache);
+					t._body && t._body.find(".grid-body tbody").html(resHTML);
+				}
+			}else{
+				if(sw === ''){
+					t._items && (t.options.items = t._items);
+					var resHTML = t.simpleCreateContent(t._items);
+					t._body && t._body.find(".grid-body tbody").html(resHTML);
+					t._search_box.slideUp();
+				}else{
+					alert('no matched item found.');
+				}
+			}
+			t._search_box.slideUp();
+		};
+		//测试
+		var grid = new Grid({
+			ele:".listview",//需要填充的元素
+			//items:[],     //JSON数据源
+			//allowScrolling:true,//设置表格的高度默认开启
+			//scrollSettings:{//默认高度300,allowScrolling为true时有效
+			//	height:350
+			//},
+			fields:[		//需要显示的列头 支持设置列宽
+				{field:"AudtPrsn",headerText:"姓名"/*width:200*/},
+				{field:"AudtStat",headerText:"状态"},
+				{field:"Remark",headerText:"备注"}
+			],
+			allowPaging:true, //是否开启分页 默认未开启
+			pageSettings:{	  //设置分页参数 allowPaging为true时有效
+				pageSize:20,
+				pageType:"drag" //分页类型 拖动drag 数字number(尚未实现)
+			},
+			//allowSorting:true, //是否开启排序，默认未开启
+			//allowFiltering:true,//是否开启搜索，默认未开启 长按对应表头触发
+			rowSelecting:function(index,item){ //触摸行回调
+				alert(JSON.stringify(item));
+			},
+			actionSuccess:function(){//表格填充完的回调函数
+				alert('load complete.');
+			}
+		});
+			
+		//测试
+		setTimeout(function(){
+			//支持Ajax填充数据
+			grid.refresh(getTestData(0,1000));
+		},2000);
+		//获取测试数据
+		function getTestData(s,e){
+			var res = [];
+			for(var i=s;i<e;i++){
+				res.push({
+					AudtPrsn:"test"+i,
+					AudtStat: (i%2) === 0 ? "同意" : "不同意",
+					Remark:"mark_"+i
+				});
+			}
+			return res;
+		}
+	</script>
+</body>
+</html>

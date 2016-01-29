@@ -1,0 +1,104 @@
+/*	这个是高速项目grid插件 原来的调用方法
+			grid = fms.grid($("#listview"),{
+                    fields:[
+                    {headerText:"姓名",field:"AudtPrsn",width: 200}
+              
+                    ,{headerText:"状态",field:"AudtStat",width: 130}
+                    ,{headerText:"备注",field:"Remark",width: 380}
+                    ],
+                    scrollHeight:'300px',
+                    primary:'ID'
+                    });
+             grid.create();
+      
+			$.api.auth({
+				method : "bcp.list.get",
+				key: 'id',    
+				module: '0162',    
+				page: '1',    
+				pagesize: '50',    
+				type: 'before',
+				FormID: fms.local.getJson('hnjy_TransferItem').FormID
+				
+			}, function (data) {
+				  grid.setdata(data.items);  
+			});  
+
+//=============================================================================================
+			新的grid插件使用方法
+			var grid = fms.grid({
+				ele:"#listview",//目标元素的ID
+	            fields:[
+	            {headerText:"姓名",field:"AudtPrsn",width: 200}
+	            ,{headerText:"状态",field:"AudtStat",width: 130}
+	            ,{headerText:"备注",field:"Remark",width: 380}
+	            ],
+	            scrollHeight:'300px',
+	            items:[] //JSON数据源 AJAX获取数据不需要设置
+	            });
+			$.api.auth({
+				method : "bcp.list.get",
+				key: 'id',    
+				module: '0162',    
+				page: '1',    
+				pagesize: '50',    
+				type: 'before',
+				FormID: fms.local.getJson('hnjy_TransferItem').FormID	
+			}, function (data) { 
+				AJAX获取数据 这样设置即可
+				  grid.refresh(data.items);
+			});  
+		*/
+//=============================================================================================
+
+//测试实例和参数说明
+		var grid = new Grid({
+			ele:".listview",//需要填充的元素
+			//items:[],     //JSON数据源
+			//allowScrolling:true,//设置表格的高度默认开启
+			//scrollSettings:{//默认高度300,allowScrolling为true时有效
+			//	height:350
+			//},
+			fields:[		//需要显示的列头 支持设置列宽
+				{field:"AudtPrsn",headerText:"姓名"/*width:200*/},
+				{field:"AudtStat",headerText:"状态"},
+				{field:"Remark",headerText:"备注"}
+			],
+			allowPaging:true, //是否开启分页 默认未开启
+			pageSettings:{	  //设置分页参数 allowPaging为true时有效
+				pageSize:20,
+				pageType:"drag" //分页类型 拖动drag 数字number(尚未实现)
+			},
+			//allowSorting:true, //是否开启排序，默认未开启
+			//allowFiltering:true,//是否开启搜索，默认未开启 长按对应表头触发
+			rowSelecting:function(index,item){ //触摸行回调
+				alert(JSON.stringify(item));
+			},
+			actionSuccess:function(){//表格填充完的回调函数
+				alert('load complete.');
+			}
+		});
+			
+		//测试
+		setTimeout(function(){
+			//支持Ajax填充数据
+			grid.refresh(getTestData(0,1000));
+		},2000);
+		//获取测试数据
+		function getTestData(s,e){
+			var res = [];
+			for(var i=s;i<e;i++){
+				res.push({
+					AudtPrsn:"test"+i,
+					AudtStat: (i%2) === 0 ? "同意" : "不同意",
+					Remark:"mark_"+i
+				});
+			}
+			return res;
+		}
+
+
+
+
+
+		
